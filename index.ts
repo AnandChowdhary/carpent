@@ -1,15 +1,13 @@
 import slugify from "@sindresorhus/slugify";
 import { exec as _exec } from "child_process";
 import { pathExists, readJson, readFile, writeFile } from "fs-extra";
-import { prompt } from "inquirer";
+import inquirer from "inquirer";
 import ora from "ora";
 import { join } from "path";
 
 export const carpent = async (defaultRepo?: string) => {
-  const spinner = ora("Cloning git repository").start();
-
   // Ask input name
-  const { repo, dir }: { repo: string; dir: string } = await prompt([
+  const { repo, dir } = await inquirer.prompt([
     {
       name: "repo",
       type: "input",
@@ -24,8 +22,10 @@ export const carpent = async (defaultRepo?: string) => {
   ]);
 
   // Clone the repo
+  const spinner = ora("Cloning git repository").start();
   const slug = slugify(dir);
   await exec(`git clone ${repo} ${slug}`);
+  spinner.stop();
   const path = join(".", slug);
 
   // Find .carpentrc
@@ -34,7 +34,9 @@ export const carpent = async (defaultRepo?: string) => {
     config = await readJson(join(path, ".carpentrc"));
 
   // Ask questions
-  const answers: { [index: string]: string } = await prompt(config.questions);
+  const answers: { [index: string]: string } = await inquirer.prompt(
+    config.questions
+  );
 
   // Update values
   config.questions.forEach((question, index) => {
@@ -42,10 +44,13 @@ export const carpent = async (defaultRepo?: string) => {
       let fileContents = await readFile(join(slug, file), "utf8");
       if (question.find)
         fileContents = fileContents.replace(
-          question.find,
+          new RegExp(question.find, "g"),
           question.replace
-            ? (question.replace as string).replace("$VALUE", answers[index])
-            : answers[index]
+            ? (question.replace as string).replace(
+                "$VALUE",
+                answers[question.name]
+              )
+            : answers[question.name]
         );
       await writeFile(join(slug, file), fileContents);
     });
@@ -67,10 +72,20 @@ const exec = (command: string) =>
 const DEFAULT = {
   questions: [
     {
+      name: "name",
       type: "input",
       message: "Project name",
       files: ["package.json"],
       find: "carpent",
+    },
+    {
+      name: "license",
+      type: "input",
+      message: "License",
+      files: ["package.json"],
+      find: `"license": "MIT"`,
+      replace: `"license": "$VALUE"`,
+      default: "MIT",
     },
   ],
 };

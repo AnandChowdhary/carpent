@@ -1,6 +1,6 @@
-# 🏷️ Carpent
+# 🔨 Carpet
 
-Opinionated starter for server-side Node.js libraries, with [TypeScript](https://github.com/microsoft/TypeScript), tests with [Jest](https://github.com/facebook/jest), automated releases with [GitHub Actions](https://github.com/features/actions) and [Semantic Release](https://github.com/semantic-release/semantic-release), and coverage reporting from [Travis CI](https://travis-ci.org) to [Coveralls](https://coveralls.io).
+Bootstrap and configure any project using its template -- clone a repository, update data using variables, and more.
 
 [![Node CI](https://img.shields.io/github/workflow/status/AnandChowdhary/carpent/Node%20CI?label=GitHub%20CI&logo=github)](https://github.com/AnandChowdhary/carpent/actions)
 [![Travis CI](https://img.shields.io/travis/AnandChowdhary/carpent?label=Travis%20CI&logo=travis%20ci&logoColor=%23fff)](https://travis-ci.org/AnandChowdhary/carpent)
@@ -22,15 +22,22 @@ Opinionated starter for server-side Node.js libraries, with [TypeScript](https:/
 Install the package from [npm](https://www.npmjs.com/package/carpent):
 
 ```bash
-npm install carpent
+npm install --global carpent
 ```
 
-Import and use;
+Use the CLI:
+
+```bash
+carpet https://github.com/AnandChowdhary/carpet
+# Enter package.json name, license, etc.
+```
+
+Or, import and use the API:
 
 ```ts
-import { nodeTs } from "@anandchowdhary/node-ts";
+import { carpet } from "carpet";
 
-nodeTs();
+carpet("https://github.com/AnandChowdhary/carpet");
 ```
 
 ## 👩‍💻 Development
