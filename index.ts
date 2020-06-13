@@ -3,6 +3,7 @@ import { join } from "path";
 import ora from "ora";
 import slugify from "@sindresorhus/slugify";
 import { prompt } from "inquirer";
+import { pathExists, readJson } from "fs-extra";
 
 export const carpent = async (name: string, repo: string) => {
   const spinner = ora("Cloning git repository").start();
@@ -13,6 +14,9 @@ export const carpent = async (name: string, repo: string) => {
   const path = join(".", slug);
 
   // Find .carpentrc
+  let config: { questions: any[] } = DEFAULT;
+  if (await pathExists(join(path, ".carpentrc")))
+    config = await readJson(join(path, ".carpentrc"));
 
   // Return the result
   spinner.succeed(`Project ${slug} is ready in ./${path}`);
