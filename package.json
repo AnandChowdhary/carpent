@@ -34,7 +34,9 @@
     "url": "https://github.com/AnandChowdhary/carpent/issues"
   },
   "homepage": "https://anandchowdhary.github.io/carpent/",
-  "dependencies": {},
+  "dependencies": {
+    "ora": "^4.0.4"
+  },
   "devDependencies": {
     "@semantic-release/git": "^9.0.0",
     "@types/jest": "^26.0.0",
