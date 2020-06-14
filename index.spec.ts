@@ -1,7 +1,7 @@
-import { nodeTs } from "./index";
+import { carpent } from "./index";
 
-describe("node.ts", () => {
-  it("works", () => {
-    expect(nodeTs()).toBeTruthy();
+describe("carpent", async () => {
+  it("works", async () => {
+    expect(await carpent()).toBeTruthy();
   });
 });
