@@ -5,6 +5,11 @@ import inquirer from "inquirer";
 import ora from "ora";
 import { join } from "path";
 
+/**
+ * Bootstrap a new project with Carpent
+ * @param defaultRepo - Repository URL
+ * @param defaultAnswers - Object containing values
+ */
 export const carpent = async (
   defaultRepo?: string,
   defaultAnswers: { [index: string]: string } = {}
@@ -46,6 +51,7 @@ export const carpent = async (
       type: "input",
       message: "License",
       default: "MIT License",
+      choices: [],
     },
     {
       name: "licenseName",
@@ -108,6 +114,7 @@ export const carpent = async (
       if (await pathExists(join(slug, "package.json"))) {
         let packageJson = await readJson(join(slug, "package.json"));
         packageJson.license = VAL;
+        if (VAL === "UNLICENSED") packageJson.private = true;
         await writeFile(
           join(slug, "package.json"),
           JSON.stringify(packageJson, null, 2)
@@ -127,6 +134,10 @@ export const carpent = async (
   return { path };
 };
 
+/**
+ * Promise polyfill for `child_process.exec`
+ * @param command - Command to execute
+ */
 const exec = (command: string) =>
   new Promise((resolve, reject) => {
     _exec(command, (error, stdout) => {
@@ -148,6 +159,7 @@ const DEFAULT = {
   ],
 };
 
+/** Licenses (SPDX to name map) */
 export const LICENSES = {
   "Apache-2.0": "Apache 2.0",
   "BSD-3-Clause": "BSD 3-clause",
