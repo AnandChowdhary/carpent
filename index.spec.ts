@@ -1,4 +1,4 @@
-import { carpent } from "./index";
+import { carpent, getLicenseText } from "./index";
 import { pathExists, readFile, readJson, remove } from "fs-extra";
 import { join } from "path";
 
@@ -62,6 +62,30 @@ describe("carpent", () => {
     expect(
       (await readFile(join(".", "example", "LICENSE"), "utf8")).includes(
         "Anand Chowdhary"
+      )
+    ).toBeTruthy();
+  });
+});
+
+describe("license fetcher", () => {
+  it("fetches MIT license", async () => {
+    expect(
+      (await getLicenseText("MIT")).includes(
+        "Permission is hereby granted, free of charge, to any person obtaining a copy"
+      )
+    ).toBeTruthy();
+  });
+  it("fetches ISC license", async () => {
+    expect(
+      (await getLicenseText("ISC")).includes(
+        "Permission to use, copy, modify, and/or distribute this software for any"
+      )
+    ).toBeTruthy();
+  });
+  it("fetches CC BY 4.0 license", async () => {
+    expect(
+      (await getLicenseText("CC-BY-4.0")).includes(
+        "By exercising the Licensed Rights (defined below), You accept and agree"
       )
     ).toBeTruthy();
   });

@@ -124,15 +124,12 @@ export const carpent = async (
     }
 
     // Update license
+    spinner.text = "Updating license";
     if (question.name === "license") {
       const SPDX = (Object.entries(LICENSES).find(
         (pair) => pair[1] === VAL
       ) ?? [""])[0];
-      const licenseText = (
-        await got(
-          `https://raw.githubusercontent.com/AnandChowdhary/carpent/master/assets/licenses/${SPDX}.txt`
-        )
-      ).body;
+      const licenseText = await getLicenseText(SPDX);
 
       // Create LICENSE file
       await writeFile(
@@ -164,6 +161,18 @@ export const carpent = async (
   // Return the result
   spinner.succeed(`Project is ready in ./${path}`);
   return { path };
+};
+
+/**
+ * Get the text for a license
+ * @param SPDX - License SPDX identifier
+ */
+export const getLicenseText = async (SPDX: string) => {
+  return (
+    await got(
+      `https://raw.githubusercontent.com/AnandChowdhary/carpent/master/assets/licenses/${SPDX}.txt`
+    )
+  ).body;
 };
 
 /**
