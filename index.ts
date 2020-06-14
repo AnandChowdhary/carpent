@@ -76,10 +76,10 @@ export const carpent = async (
     ...(config.questions ?? []),
     {
       name: "license",
-      type: "input",
+      type: "list",
       message: "License",
       default: "MIT License",
-      choices: [],
+      choices: Object.values(LICENSES),
     },
     {
       name: "licenseName",
@@ -125,8 +125,11 @@ export const carpent = async (
 
     // Update license
     if (question.name === "license") {
+      const spdx = (Object.entries(LICENSES).find(
+        (pair) => pair[1] === VAL
+      ) ?? [""])[0];
       const licenseText = await readFile(
-        join(".", "assets", "licenses", `${VAL}.txt`),
+        join(".", "assets", "licenses", `${spdx}.txt`),
         "utf8"
       );
 
@@ -141,8 +144,8 @@ export const carpent = async (
       // Update license in package.json
       if (await pathExists(join(slug, "package.json"))) {
         let packageJson = await readJson(join(slug, "package.json"));
-        packageJson.license = VAL;
-        if (VAL === "UNLICENSED") packageJson.private = true;
+        packageJson.license = spdx;
+        if (spdx === "UNLICENSED") packageJson.private = true;
         await writeFile(
           join(slug, "package.json"),
           JSON.stringify(packageJson, null, 2)
