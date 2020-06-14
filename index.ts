@@ -219,9 +219,6 @@ const DEFAULT: CarpentConfig = {
       jsonKey: "name",
     },
   ],
-  afterAll: [
-    "https://gist.githubusercontent.com/AnandChowdhary/3c0400b29a18a2afff7a23e2a3308c22/raw/221204bc51bb7ef799363ef1e05f14c264b4a8ec/log.js",
-  ],
 };
 
 /** Licenses (SPDX to name map) */
