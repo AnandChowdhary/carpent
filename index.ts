@@ -5,6 +5,7 @@ import got from "got";
 import inquirer from "inquirer";
 import ora from "ora";
 import { join } from "path";
+import { exception } from "console";
 
 /** Carpent question (inquirer) type */
 export interface CarpentQuestion {
@@ -64,7 +65,6 @@ export const carpent = async (
   const spinner = ora("Cloning git repository").start();
   const slug = slugify(defaultAnswers.dir);
   await exec(`git clone ${defaultAnswers.repo} ${slug}`);
-  spinner.stop();
   const path = join(".", slug);
 
   // Find .carpentrc
@@ -72,7 +72,14 @@ export const carpent = async (
   if (await pathExists(join(path, ".carpentrc")))
     config = await readJson(join(path, ".carpentrc"));
 
+  // Run pre scripts
+  spinner.text = "Running scripts";
+  for await (const script of config.beforeAll ?? []) {
+    await exec(script);
+  }
+
   // Ask questions
+  spinner.stop();
   const allQuestions: CarpentQuestion[] = [
     ...(config.questions ?? []),
     {
@@ -94,9 +101,15 @@ export const carpent = async (
       ? defaultAnswers
       : await inquirer.prompt(allQuestions);
 
+  // Run pre scripts
+  spinner.text = "Running scripts";
+  spinner.start();
+  for await (const script of config.beforeAll ?? []) {
+    await exec(script);
+  }
+
   // Update values
   spinner.text = "Updating values";
-  spinner.start();
   for await (const question of allQuestions) {
     const VAL = question.replace
       ? (question.replace as string).replace(
@@ -162,8 +175,8 @@ export const carpent = async (
 
   // Run post scripts
   spinner.text = "Running scripts";
-  for await (const file of config.deleteFiles ?? []) {
-    await remove(join(slug, file));
+  for await (const script of config.afterAll ?? []) {
+    await exec(script);
   }
 
   // Return the result
