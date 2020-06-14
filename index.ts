@@ -1,35 +1,40 @@
 import slugify from "@sindresorhus/slugify";
 import { exec as _exec } from "child_process";
-import { pathExists, readJson, readFile, writeFile } from "fs-extra";
+import { pathExists, readJson, readFile, writeFile, remove } from "fs-extra";
 import inquirer from "inquirer";
 import ora from "ora";
 import { join } from "path";
 
-export const carpent = async (defaultRepo?: string) => {
+export const carpent = async (
+  defaultRepo?: string,
+  defaultAnswers: { [index: string]: string } = {}
+) => {
   // Ask input name
-  const { repo, dir } = await inquirer.prompt([
-    {
-      name: "repo",
-      type: "input",
-      message: "Git repository URL",
-      default: defaultRepo,
-    },
-    {
-      name: "dir",
-      type: "input",
-      message: "Folder name",
-    },
-  ]);
+  if (!defaultAnswers.repo || !defaultAnswers.dir) {
+    defaultAnswers = await inquirer.prompt([
+      {
+        name: "repo",
+        type: "input",
+        message: "Git repository URL",
+        default: defaultRepo,
+      },
+      {
+        name: "dir",
+        type: "input",
+        message: "Folder name",
+      },
+    ]);
+  }
 
   // Clone the repo
   const spinner = ora("Cloning git repository").start();
-  const slug = slugify(dir);
-  await exec(`git clone ${repo} ${slug}`);
+  const slug = slugify(defaultAnswers.dir);
+  await exec(`git clone ${defaultAnswers.repo} ${slug}`);
   spinner.stop();
   const path = join(".", slug);
 
   // Find .carpentrc
-  let config: { questions: any[] } = DEFAULT;
+  let config: { questions: any[]; deleteFiles?: string[] } = DEFAULT;
   if (await pathExists(join(path, ".carpentrc")))
     config = await readJson(join(path, ".carpentrc"));
 
@@ -39,6 +44,8 @@ export const carpent = async (defaultRepo?: string) => {
   );
 
   // Update values
+  spinner.text = "Updating values";
+  spinner.start();
   for await (const question of config.questions) {
     for await (const file of question.files) {
       const VAL = question.replace
@@ -64,8 +71,14 @@ export const carpent = async (defaultRepo?: string) => {
     }
   }
 
+  // Delete files
+  spinner.text = "Deleting files";
+  for await (const file of config.deleteFiles ?? []) {
+    await remove(join(slug, file));
+  }
+
   // Return the result
-  spinner.succeed(`Project ${slug} is ready in ./${path}`);
+  spinner.succeed(`Project is ready in ./${path}`);
   return { path };
 };
 
@@ -78,6 +91,7 @@ const exec = (command: string) =>
   });
 
 const DEFAULT = {
+  deleteFiles: [".carpentrc"],
   questions: [
     {
       name: "name",
