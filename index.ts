@@ -5,7 +5,6 @@ import got from "got";
 import inquirer from "inquirer";
 import ora from "ora";
 import { join } from "path";
-import { exception } from "console";
 
 /** Carpent question (inquirer) type */
 export interface CarpentQuestion {
@@ -95,6 +94,11 @@ export const carpent = async (
       message: "Name in license (usually full name)",
       default: slug,
     },
+    {
+      name: "initializeNewRepo",
+      type: "confirm",
+      message: "Initialize new git repository?",
+    },
   ];
   const answers: { [index: string]: string } =
     Object.keys(defaultAnswers).length > 2
@@ -171,6 +175,12 @@ export const carpent = async (
   spinner.text = "Deleting files";
   for await (const file of config.deleteFiles ?? []) {
     await remove(join(slug, file));
+  }
+
+  // Set up git repository
+  spinner.text = "Setting up git repository";
+  if (answers.initializeNewRepo) {
+    await exec(`cd ${path} && rm -rf .git && git init && cd ..`);
   }
 
   // Run post scripts

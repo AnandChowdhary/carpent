@@ -10,6 +10,7 @@ describe("carpent", () => {
       name: "example-project",
       license: "ISC License",
       licenseName: "Anand Chowdhary",
+      pushAccess: "Do nothing, I'll initialize the repository myself",
     });
   }, 30000);
 
