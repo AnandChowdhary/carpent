@@ -35,11 +35,9 @@ export interface CarpentConfig {
 
 /**
  * Bootstrap a new project with Carpent
- * @param defaultRepo - Repository URL
  * @param defaultAnswers - Object containing values
  */
 export const carpent = async (
-  defaultRepo?: string,
   defaultAnswers: { [index: string]: string } = {}
 ) => {
   // Ask input name
@@ -49,7 +47,7 @@ export const carpent = async (
         name: "repo",
         type: "input",
         message: "Git repository URL",
-        default: defaultRepo,
+        default: defaultAnswers.repo,
       },
       {
         name: "dir",
@@ -88,9 +86,10 @@ export const carpent = async (
       default: slug,
     },
   ];
-  const answers: { [index: string]: string } = await inquirer.prompt(
-    allQuestions
-  );
+  const answers: { [index: string]: string } =
+    Object.keys(defaultAnswers).length > 2
+      ? defaultAnswers
+      : await inquirer.prompt(allQuestions);
 
   // Update values
   spinner.text = "Updating values";
@@ -205,5 +204,3 @@ export const LICENSES = {
   "MPL-2.0": "Mozilla Public License 2.0",
   Unlicense: "The Unlicense",
 };
-
-carpent("http://github.com/AnandChowdhary/carpent");
