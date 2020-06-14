@@ -32,6 +32,8 @@ export interface CarpentQuestion {
 export interface CarpentConfig {
   deleteFiles?: string[];
   questions?: CarpentQuestion[];
+  beforeAll?: string[];
+  afterAll?: string[];
 }
 
 /**
@@ -158,6 +160,12 @@ export const carpent = async (
     await remove(join(slug, file));
   }
 
+  // Run post scripts
+  spinner.text = "Running scripts";
+  for await (const file of config.deleteFiles ?? []) {
+    await remove(join(slug, file));
+  }
+
   // Return the result
   spinner.succeed(`Project is ready in ./${path}`);
   return { path };
@@ -197,6 +205,9 @@ const DEFAULT: CarpentConfig = {
       files: ["package.json"],
       jsonKey: "name",
     },
+  ],
+  afterAll: [
+    "https://gist.githubusercontent.com/AnandChowdhary/3c0400b29a18a2afff7a23e2a3308c22/raw/221204bc51bb7ef799363ef1e05f14c264b4a8ec/log.js",
   ],
 };
 
