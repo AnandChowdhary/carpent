@@ -19,7 +19,13 @@ Bootstrap and configure any project using its template -- clone a repository, up
 
 ## 💡 Usage
 
-Install the package globally from [npm](https://www.npmjs.com/package/carpent):
+If you want to quickly bootstrap a project, use `npx`:
+
+```bash
+npx carpent
+```
+
+Alternately, you can install the package globally from [npm](https://www.npmjs.com/package/carpent):
 
 ```bash
 npm install --global carpent
@@ -29,7 +35,6 @@ Use the CLI:
 
 ```bash
 carpet
-# Enter repo URL, package.json name, license, etc., and your project is ready
 ```
 
 Or, import and use the API:
@@ -37,12 +42,27 @@ Or, import and use the API:
 ```ts
 import { carpet } from "carpet";
 
-carpet("https://github.com/AnandChowdhary/carpet");
+carpet({
+  repo: "https://github.com/AnandChowdhary/carpet",
+  // ...all configuration options here (see API Configuration)
+});
 ```
 
 ### Setting up Carpent with your template
 
 If you're building a template repository that others can use, you can add Carpent by creating a `.carpentrc` file in the root:
+
+### API Configuration
+
+You can specify a key-value pair as the API parameter with the following properties:
+
+| Property            | Description                   | Default       |
+| ------------------- | ----------------------------- | ------------- |
+| `repo`              | Git repository URL            | _Required_    |
+| `dir`               | Path to directory to create   | `"carpent"`   |
+| `license`           | License                       | `MIT License` |
+| `licenseName`       | Full name for license         |               |
+| `initializeNewRepo` | Initialize new git repository | `false`       |
 
 ## 👩‍💻 Development
 
