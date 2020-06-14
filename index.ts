@@ -56,6 +56,7 @@ export const carpent = async (
         name: "dir",
         type: "input",
         message: "Folder name",
+        default: "carpent",
       },
     ]);
   }
