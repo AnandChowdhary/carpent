@@ -5,6 +5,34 @@ import inquirer from "inquirer";
 import ora from "ora";
 import { join } from "path";
 
+/** Carpent question (inquirer) type */
+export interface CarpentQuestion {
+  name: string;
+  type:
+    | "checkbox"
+    | "confirm"
+    | "editor"
+    | "expand"
+    | "input"
+    | "list"
+    | "number"
+    | "password"
+    | "rawlist";
+  message: string;
+  default?: string;
+  choices?: string[];
+  files?: string[];
+  jsonKey?: string;
+  find?: string;
+  replace?: string;
+}
+
+/** Carpent configuration object type */
+export interface CarpentConfig {
+  deleteFiles?: string[];
+  questions?: CarpentQuestion[];
+}
+
 /**
  * Bootstrap a new project with Carpent
  * @param defaultRepo - Repository URL
@@ -39,13 +67,13 @@ export const carpent = async (
   const path = join(".", slug);
 
   // Find .carpentrc
-  let config: { questions: any[]; deleteFiles?: string[] } = DEFAULT;
+  let config: CarpentConfig = DEFAULT;
   if (await pathExists(join(path, ".carpentrc")))
     config = await readJson(join(path, ".carpentrc"));
 
   // Ask questions
-  const allQuestions = [
-    ...config.questions,
+  const allQuestions: CarpentQuestion[] = [
+    ...(config.questions ?? []),
     {
       name: "license",
       type: "input",
@@ -146,7 +174,7 @@ const exec = (command: string) =>
     });
   });
 
-const DEFAULT = {
+const DEFAULT: CarpentConfig = {
   deleteFiles: [".carpentrc"],
   questions: [
     {
