@@ -25,6 +25,8 @@ If you want to quickly bootstrap a project, use `npx`:
 npx carpent
 ```
 
+![Example screen recording](./assets/carpent.gif)
+
 Alternately, you can install the package globally from [npm](https://www.npmjs.com/package/carpent):
 
 ```bash
@@ -50,7 +52,48 @@ carpet({
 
 ### Setting up Carpent with your template
 
-If you're building a template repository that others can use, you can add Carpent by creating a `.carpentrc` file in the root:
+If you're building a template repository that others can use, you can add Carpent by creating a `.carpentrc` file in the root with the following schema:
+
+```json
+{
+  "questions": [], // Configuration questions to ask
+  "deleteFiles": [], // List of files to delete
+  "beforeAll": [], // Scripts to run before process
+  "afterAll": [] // Scripts to run after process
+}
+```
+
+For example:
+
+```json
+{
+  "deleteFiles": [".carpentrc"], // Delete the .carpentrc file
+  "questions": [
+    {
+      "name": "name", // `name` is required in each input
+      "type": "input", // Let users type an input response
+      "message": "Project name", // Ask them this question
+      "files": ["package.json"], // Update the package.json file
+      "jsonKey": "name" // Change the `name` key in package.json
+    }
+  ],
+  "afterAll": ["echo 'Completed!'"] // Run this script at the end
+}
+```
+
+Each question under `questions` support the following properties:
+
+| Property             | Description                                                                     |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `name` (required)    | Internal name for question                                                      |
+| `type` (required)    | One of [Inquirer.js](https://github.com/SBoudrias/Inquirer.js)'s question types |
+| `message` (required) | Question to ask the user                                                        |
+| `default`            | Default value for this answer                                                   |
+| `choices`            | Let users select one of these options                                           |
+| `files`              | Update these files                                                              |
+| `jsonKey`            | Update this JSON key                                                            |
+| `find`               | Find this value for replacing                                                   |
+| `replace`            | Repace with this value                                                          |
 
 ### API Configuration
 
