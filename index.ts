@@ -39,22 +39,30 @@ export const carpent = async (defaultRepo?: string) => {
   );
 
   // Update values
-  config.questions.forEach((question, index) => {
-    ((question.files ?? []) as string[]).forEach(async (file) => {
+  for await (const question of config.questions) {
+    for await (const file of question.files) {
+      const VAL = question.replace
+        ? (question.replace as string).replace(
+            new RegExp("$VALUE", "g"),
+            answers[question.name]
+          )
+        : answers[question.name];
       let fileContents = await readFile(join(slug, file), "utf8");
       if (question.find)
         fileContents = fileContents.replace(
           new RegExp(question.find, "g"),
-          question.replace
-            ? (question.replace as string).replace(
-                "$VALUE",
-                answers[question.name]
-              )
-            : answers[question.name]
+          VAL
         );
+
+      // Support JSON key changes
+      if (question.jsonKey) {
+        const jsonContent: any = JSON.parse(fileContents);
+        jsonContent[question.jsonKey] = VAL;
+        fileContents = JSON.stringify(jsonContent, null, 2);
+      }
       await writeFile(join(slug, file), fileContents);
-    });
-  });
+    }
+  }
 
   // Return the result
   spinner.succeed(`Project ${slug} is ready in ./${path}`);
@@ -76,15 +84,14 @@ const DEFAULT = {
       type: "input",
       message: "Project name",
       files: ["package.json"],
-      find: "carpent",
+      jsonKey: "name",
     },
     {
       name: "license",
       type: "input",
       message: "License",
       files: ["package.json"],
-      find: `"license": "MIT"`,
-      replace: `"license": "$VALUE"`,
+      jsonKey: "license",
       default: "MIT",
     },
   ],
