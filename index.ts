@@ -1,6 +1,7 @@
 import slugify from "@sindresorhus/slugify";
 import { exec as _exec } from "child_process";
-import { pathExists, readJson, readFile, writeFile, remove } from "fs-extra";
+import { pathExists, readFile, readJson, remove, writeFile } from "fs-extra";
+import got from "got";
 import inquirer from "inquirer";
 import ora from "ora";
 import { join } from "path";
@@ -124,13 +125,14 @@ export const carpent = async (
 
     // Update license
     if (question.name === "license") {
-      const spdx = (Object.entries(LICENSES).find(
+      const SPDX = (Object.entries(LICENSES).find(
         (pair) => pair[1] === VAL
       ) ?? [""])[0];
-      const licenseText = await readFile(
-        join(".", "assets", "licenses", `${spdx}.txt`),
-        "utf8"
-      );
+      const licenseText = (
+        await got(
+          `https://raw.githubusercontent.com/AnandChowdhary/carpent/master/assets/licenses/${SPDX}.txt`
+        )
+      ).body;
 
       // Create LICENSE file
       await writeFile(
@@ -143,8 +145,8 @@ export const carpent = async (
       // Update license in package.json
       if (await pathExists(join(slug, "package.json"))) {
         let packageJson = await readJson(join(slug, "package.json"));
-        packageJson.license = spdx;
-        if (spdx === "UNLICENSED") packageJson.private = true;
+        packageJson.license = SPDX;
+        if (SPDX === "UNLICENSED") packageJson.private = true;
         await writeFile(
           join(slug, "package.json"),
           JSON.stringify(packageJson, null, 2)
